@@ -14,8 +14,8 @@ router.get('/list', async (request, response) => {
     try {
         const data = await roomModel.find();
         const options = data.map(room => ({
-            label: room.room_id,
-            value: room.room_id
+            label: room.roomId,
+            value: room.roomId
         }));
         response.json(options);
     } catch (error) {
@@ -58,13 +58,15 @@ router.put('/', async (request, response) => {
     }
 });
 
-router.delete('/:id', async (request, response) => {
-    const { id } = request.params;
-    const deletedItem = await roomModel.findByIdAndDelete(id);
+
+
+router.delete('/:hotelId', async (request, response) => {
+    const { hotelId } = request.params;
+    const deletedItem = await roomModel.deleteMany({hotelId:hotelId});
     if (deletedItem) {
-        response.status(200).json({ message: 'room deleted successfully' });
+        response.status(200).json({ message: hotelId+' rooms deleted successfully' });
     } else {
-        response.status(404).json({ message: 'room not found' });
+        response.status(404).json({ message: 'rooms not found' });
     }
 })
 

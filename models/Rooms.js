@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
 
 const RoomsSchema = new mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
-    hotel_id: { type: String },// hotel _id
-    room_id: { type: String },// room name
-    room_type: { type: String },
-    room_categ: { type: String },
+    hotelId: { type: String },// hotel _id
+    roomId: { type: String },// room name
+    roomType: { type: String },
+    roomCateg: { type: String },
     meals: { type: String },
     persons: { type: Number },
-    range: { type: String },
+    range: { type: [Date] },
     notes: { type: String },
     user: { type: String },
 })

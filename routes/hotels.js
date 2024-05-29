@@ -39,7 +39,7 @@ router.post('/', async (request, response) => {
         ...request.body, //to get all data from request.body
     })
     await newHotel.save()
-    response.json({ message: 'Saved!' })
+    response.json({ message: 'Saved!',hotelId: newHotel._id  })
 })
 
 router.put('/', async (request, response) => {
