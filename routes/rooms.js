@@ -1,4 +1,4 @@
-import express from "express"
+import express, { response } from "express"
 
 const router = express.Router();
 
@@ -58,13 +58,30 @@ router.put('/', async (request, response) => {
     }
 });
 
+router.get('/forhotel/:hotelId', async (request, response) => {
+    const { hotelId } = request.params
+    const data = await roomModel.find({ hotelId: hotelId })
+    // Update the range for each room document
+    const updatedData = data.map(room => {
+        const newRange = [room.range[0], room.range[room.range.length - 1]];
+        return {
+            ...room._doc, // use `_doc` to get the plain JavaScript object if using Mongoose
+            range: newRange
+        };
+    });
+    if (updatedData) {
+        response.json(updatedData);
+    } else {
+        response.status(404).json({ message: 'rooms not found' });
+    }
+})
 
 
 router.delete('/:hotelId', async (request, response) => {
     const { hotelId } = request.params;
-    const deletedItem = await roomModel.deleteMany({hotelId:hotelId});
+    const deletedItem = await roomModel.deleteMany({ hotelId: hotelId });
     if (deletedItem) {
-        response.status(200).json({ message: hotelId+' rooms deleted successfully' });
+        response.status(200).json({ message: hotelId + ' rooms deleted successfully' });
     } else {
         response.status(404).json({ message: 'rooms not found' });
     }
