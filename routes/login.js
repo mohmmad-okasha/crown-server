@@ -1,5 +1,5 @@
 import express, { request, response } from "express"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 
 const router = express.Router(); // Create a router instance
