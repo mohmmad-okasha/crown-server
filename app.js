@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 
-const port = process.env.PORT || 3000; // Use PORT environment variable
+const port = process.env.PORT || 3001 || 8080; // Use PORT environment variable
 
 // Start express app
 const app = express();
