@@ -29,6 +29,7 @@ import loginRouter from './routes/login.js';
 import logsRouter from './routes/logs.js';
 import hotelsRouter from './routes/hotels.js';
 import roomsRouter from './routes/rooms.js';
+import availableHotelsRouter from './routes/availableHotels.js';
 
 // Use routes
 app.use('/users', usersRouter);
@@ -36,6 +37,7 @@ app.use('/login', loginRouter);
 app.use('/logs', logsRouter);
 app.use('/hotels', hotelsRouter);
 app.use('/rooms', roomsRouter);
+app.use('/availableHotels', availableHotelsRouter);
 
 // Start server
 app.listen(port, () => {

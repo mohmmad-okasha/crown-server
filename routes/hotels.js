@@ -15,7 +15,7 @@ router.get('/list', async (request, response) => {
         const data = await hotelModel.find();
         const options = data.map(hotel => ({
             label: hotel.name,
-            value: hotel.name
+            value: hotel._id
         }));
         response.json(options);
     } catch (error) {
