@@ -54,7 +54,7 @@ router.put('/', async (request, response) => {
             response.json({ message: 'Hotel not found!' })
         }
 
-        response.json({ message: 'Updated!' })
+        response.json({ message: 'Updated!',hotelId:id })
 
     } catch (err) {
         response.json({ message: 'Error updating hotel: ', err })
