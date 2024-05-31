@@ -24,12 +24,30 @@ router.post('/', async (request, response) => {
             data.forEach(room => {
                 room.range = room.range.filter(dateObj => {
                     const date = new Date(dateObj);
-                    return date.getUTCFullYear() === searchYear && date.getUTCMonth() + 1 === searchMonth;
+                    return date.getUTCFullYear() === searchYear && date.getUTCMonth()  === searchMonth;
                 });
+                return room.range.length > 0; // Only keep rooms with non-empty ranges
             });
         }
 
-        response.json(data);
+        const roomData = await Promise.all(data.map(async (room) => {
+            const hotel = await hotelModel.findById(room.hotelId);
+            const hotelName = hotel ? hotel.name : '';
+            if (room.range.length > 0) {
+                return {
+                    categ: room.roomCateg,
+                    name: `${room.roomId} - ${hotelName}`,
+                    dates: room.range
+                };
+            }
+            return null;
+        }));
+
+        // Filter out null values from roomData
+        const filteredRoomData = roomData.filter(room => room !== null);
+
+        response.json(filteredRoomData);
+
     } catch (error) {
         response.status(500).json({ error: 'An error occurred while fetching the data.' });
     }
