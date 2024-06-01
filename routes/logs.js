@@ -8,7 +8,7 @@ const LogsModel = (await import('../models/Logs.js')).default;
 router.get('/', async (request, response) => {
     const search =request.params.search;
 
-    const data = await LogsModel.find();
+    const data = await LogsModel.find().sort({ _id: -1 });
     if(search){
         data.filter('userName'===search)
     }
