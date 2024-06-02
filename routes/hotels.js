@@ -39,7 +39,7 @@ router.post('/', async (request, response) => {
         ...request.body, //to get all data from request.body
     })
     await newHotel.save()
-    response.json({ message: 'Saved!',hotelId: newHotel._id  })
+    response.json({ message: 'Saved!', hotelId: newHotel._id })
 })
 
 router.put('/', async (request, response) => {
@@ -47,14 +47,14 @@ router.put('/', async (request, response) => {
         const id = request.body._id;// get id for updated record
 
         const updatedHotel = await hotelModel.findByIdAndUpdate(id, {
-           ...request.body
+            ...request.body
         }, { new: true }); // Return the updated document
 
         if (!updatedHotel) {
             response.json({ message: 'Hotel not found!' })
         }
 
-        response.json({ message: 'Updated!',hotelId:id })
+        response.json({ message: 'Updated!', hotelId: id })
 
     } catch (err) {
         response.json({ message: 'Error updating hotel: ', err })

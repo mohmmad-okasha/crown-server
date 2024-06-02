@@ -70,7 +70,12 @@ router.get('/forhotel/:hotelId', async (request, response) => {
         };
     });
     if (updatedData) {
-        response.json(updatedData);
+        const options = data.map(room => ({
+            label: room.roomId,
+            value: room.roomId,
+            type: room.roomType,
+        }));
+        response.json({data:updatedData,options:options});
     } else {
         response.status(404).json({ message: 'rooms not found' });
     }
