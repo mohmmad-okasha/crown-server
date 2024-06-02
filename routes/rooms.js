@@ -24,8 +24,8 @@ router.get('/list', async (request, response) => {
 });
 
 //get room data by roomname
-router.get('/:room_id', async (request, response) => {
-    const data = await roomModel.findOne({ room_id: request.params.roomName });
+router.get('/:roomId', async (request, response) => {
+    const data = await roomModel.findOne({ roomId: request.params.roomName });
     response.json(data);
 });
 
@@ -66,7 +66,7 @@ router.get('/forhotel/:hotelId', async (request, response) => {
         const newRange = [room.range[0], room.range[room.range.length - 1]];
         return {
             ...room._doc, // use `_doc` to get the plain JavaScript object if using Mongoose
-            range: newRange
+            range: room.range
         };
     });
     if (updatedData) {
@@ -74,6 +74,7 @@ router.get('/forhotel/:hotelId', async (request, response) => {
             label: room.roomId,
             value: room.roomId,
             type: room.roomType,
+            range: room.range,
         }));
         response.json({data:updatedData,options:options});
     } else {

@@ -11,7 +11,7 @@ const BookingsSchema = new mongoose.Schema({
     hotel: { type: String },
     dates: { type: [Date] },
     out_date: { type: Date },
-    room_id: { type: String },
+    roomId: { type: String },
     room_type: { type: String },
     status: { type: String },
     notes: { type: String },
