@@ -61,22 +61,23 @@ router.put('/', async (request, response) => {
 router.get('/forhotel/:hotelId', async (request, response) => {
     const { hotelId } = request.params
     const data = await roomModel.find({ hotelId: hotelId })
+
     // Update the range for each room document
-    const updatedData = data.map(room => {
-        const newRange = [room.range[0], room.range[room.range.length - 1]];
-        return {
-            ...room._doc, // use `_doc` to get the plain JavaScript object if using Mongoose
-            range: room.range
-        };
-    });
-    if (updatedData) {
+    // const updatedData = data.map(room => {
+    //     const newRange = [room.range[0], room.range[room.range.length - 1]];
+    //     return {
+    //         ...room._doc, // use `_doc` to get the plain JavaScript object if using Mongoose
+    //         range: room.range
+    //     };
+    // });
+    if (data) {
         const options = data.map(room => ({
             label: room.roomId,
             value: room.roomId,
             type: room.roomType,
             range: room.range,
         }));
-        response.json({data:updatedData,options:options});
+        response.json({ data: data, options: options });
     } else {
         response.status(404).json({ message: 'rooms not found' });
     }
