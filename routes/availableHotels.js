@@ -5,6 +5,7 @@ const router = express.Router();
 //import models file
 const hotelModel = (await import('../models/Hotels.js')).default;
 const roomModel = (await import('../models/Rooms.js')).default;
+const bookingModel = (await import('../models/Bookings.js')).default;
 
 router.post('/', async (request, response) => {
     const { hotelId, searchTime, roomType } = request.body;
@@ -32,12 +33,18 @@ router.post('/', async (request, response) => {
 
         const roomData = await Promise.all(data.map(async (room) => {
             const hotel = await hotelModel.findById(room.hotelId);
+            const booked = await bookingModel.findOne({hotel:hotel.name,roomId:room.roomId}, { dates: 1 })
+            
+
+            const closeDates = booked ? booked.dates : '';
+
             const hotelName = hotel ? hotel.name : '';
             if (room.range.length > 0) {
                 return {
                     categ: room.roomCateg,
                     name: `${room.roomId} - ${hotelName}`,
-                    dates: room.range
+                    dates: room.range,
+                    close: closeDates
                 };
             }
             return null;

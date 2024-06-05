@@ -7,7 +7,7 @@ const BookingsSchema = new mongoose.Schema({
     adultsNames: { type: [String] },
     kids: { type: Number },
     kidsNames: { type: [String] },
-    kidsAges: { type: Number },
+    kidsAges: { type: [String] },
     hotel: { type: String },
     dates: { type: [Date] },
     outDate: { type: Date },
