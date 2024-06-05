@@ -2,6 +2,7 @@ import express from "express"
 
 const router = express.Router();
 
+  
 //import models file
 const hotelModel = (await import('../models/Hotels.js')).default;
 const roomModel = (await import('../models/Rooms.js')).default;
@@ -34,11 +35,10 @@ router.post('/', async (request, response) => {
         const roomData = await Promise.all(data.map(async (room) => {
             const hotel = await hotelModel.findById(room.hotelId);
             const booked = await bookingModel.findOne({hotel:hotel.name,roomId:room.roomId}, { dates: 1 })
-            
 
-            const closeDates = booked ? booked.dates : '';
+            const closeDates = booked ? booked.dates : ''
 
-            const hotelName = hotel ? hotel.name : '';
+            const hotelName = hotel ? hotel.name : ''
             if (room.range.length > 0) {
                 return {
                     categ: room.roomCateg,
