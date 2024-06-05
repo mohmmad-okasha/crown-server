@@ -2,11 +2,25 @@ import express from "express"
 
 const router = express.Router();
 
-  
+
 //import models file
 const hotelModel = (await import('../models/Hotels.js')).default;
 const roomModel = (await import('../models/Rooms.js')).default;
 const bookingModel = (await import('../models/Bookings.js')).default;
+
+// Function to get all dates between a start and end date
+const getDatesInRange = (startDate, endDate) => {
+    const dates = [];
+    let currentDate = new Date(startDate);
+    const lastDate = new Date(endDate);
+
+    while (currentDate <= lastDate) {
+        dates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates;
+};
 
 router.post('/', async (request, response) => {
     const { hotelId, searchTime, roomType } = request.body;
@@ -26,7 +40,7 @@ router.post('/', async (request, response) => {
             data.forEach(room => {
                 room.range = room.range.filter(dateObj => {
                     const date = new Date(dateObj);
-                    return date.getUTCFullYear() === searchYear && date.getUTCMonth()  === searchMonth;
+                    return date.getUTCFullYear() === searchYear && date.getUTCMonth() === searchMonth;
                 });
                 return room.range.length > 0; // Only keep rooms with non-empty ranges
             });
@@ -34,17 +48,39 @@ router.post('/', async (request, response) => {
 
         const roomData = await Promise.all(data.map(async (room) => {
             const hotel = await hotelModel.findById(room.hotelId);
-            const booked = await bookingModel.findOne({hotel:hotel.name,roomId:room.roomId}, { dates: 1 })
+            const bookedRooms = await bookingModel.find(
+                { hotel: hotel.name, roomId: room.roomId },
+                { dates: 1 }
+            );
 
-            const closeDates = booked ? booked.dates : ''
 
-            const hotelName = hotel ? hotel.name : ''
+            const closeDates = bookedRooms.reduce((acc, booking) => {
+                const datesInRange = getDatesInRange(booking.dates[0], booking.dates[1]);
+                return acc.concat(datesInRange);
+            }, []);
+
+            let outDates = bookedRooms.reduce((acc, booking) => {
+                const lastDate = booking.dates[1];
+                return acc.concat(lastDate);
+            }, []);
+
+            // Count occurrences of each date in closeDates
+            const dateCounts = {};
+            closeDates.forEach(date => {
+                dateCounts[date] = (dateCounts[date] || 0) + 1;
+            });
+
+            // Filter outDates based on the count in closeDates
+            outDates = outDates.filter(date => dateCounts[date] <= 1);
+
+            const hotelName = hotel ? hotel.name : '';
             if (room.range.length > 0) {
                 return {
                     categ: room.roomCateg,
                     name: `${room.roomId} - ${hotelName}`,
                     dates: room.range,
-                    close: closeDates
+                    close: closeDates,
+                    outDates: outDates,
                 };
             }
             return null;
