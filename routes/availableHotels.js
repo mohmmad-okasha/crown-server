@@ -49,10 +49,9 @@ router.post('/', async (request, response) => {
         const roomData = await Promise.all(data.map(async (room) => {
             const hotel = await hotelModel.findById(room.hotelId);
             const bookedRooms = await bookingModel.find(
-                { hotel: hotel.name, roomId: room.roomId },
+                { hotel: hotel.name, roomId: room.roomId , status: 'Booked' },
                 { dates: 1 }
             );
-
 
             const closeDates = bookedRooms.reduce((acc, booking) => {
                 const datesInRange = getDatesInRange(booking.dates[0], booking.dates[1]);
@@ -64,15 +63,22 @@ router.post('/', async (request, response) => {
                 return acc.concat(lastDate);
             }, []);
 
-            // Count occurrences of each date in closeDates
+            // Filter outDates based on the count in closeDates to know if outdate is booked then remove from closeDates
             const dateCounts = {};
             closeDates.forEach(date => {
                 dateCounts[date] = (dateCounts[date] || 0) + 1;
             });
-
-            // Filter outDates based on the count in closeDates
             outDates = outDates.filter(date => dateCounts[date] <= 1);
 
+            const noShowRooms = await bookingModel.find(
+                { hotel: hotel.name, roomId: room.roomId , status: 'No Show' },
+                { dates: 1 }
+            );
+            const noShowDates = noShowRooms.reduce((acc, noShow) => {
+                const datesInRange = getDatesInRange(noShow.dates[0], noShow.dates[1]);
+                return acc.concat(datesInRange);
+            }, []);
+            
             const hotelName = hotel ? hotel.name : '';
             if (room.range.length > 0) {
                 return {
@@ -81,6 +87,7 @@ router.post('/', async (request, response) => {
                     dates: room.range,
                     close: closeDates,
                     outDates: outDates,
+                    noShowDates: noShowDates,
                 };
             }
             return null;
