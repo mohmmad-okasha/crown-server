@@ -7,11 +7,13 @@ const bookingModel = (await import('../models/Bookings.js')).default;
 
 router.post('/', async (request, response) => {
     const { filter, range } = request.body;
-    console.log('filter :' + filter)
 
     let data = {}
     if (filter) {
         switch (filter) {
+            case 'All':{
+                data = await bookingModel.find();
+            }
             case 'Custom Date': {
                 if (range[0]) {
                     const now = dayjs();
@@ -113,7 +115,6 @@ router.get('/', async (request, response) => {
 
     const { filter, range2 } = request.query;
     const range = request.query.range ? request.query.range.split(',') : [];
-    console.log('range ' + range)
     let data = {}
     if (filter) {
         switch (filter) {
@@ -183,7 +184,6 @@ router.get('/', async (request, response) => {
         }
     }
     else if (range.length) {
-        console.log('range ' + range)
 
         const now = dayjs();
 
