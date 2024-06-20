@@ -2,7 +2,9 @@ import express from "express"
 import dayjs from "dayjs";
 const router = express.Router();
 
-//import bookings model file
+//import models file
+const hotelModel = (await import('../models/Hotels.js')).default;
+const roomModel = (await import('../models/Rooms.js')).default;
 const bookingModel = (await import('../models/Bookings.js')).default;
 
 router.post('/', async (request, response) => {
@@ -11,7 +13,7 @@ router.post('/', async (request, response) => {
     let data = {}
     if (filter) {
         switch (filter) {
-            case 'All':{
+            case 'All': {
                 data = await bookingModel.find();
             }
             case 'Custom Date': {
@@ -27,7 +29,7 @@ router.post('/', async (request, response) => {
                             $lte: end
                         }
                     });
-                }else{//if clear range load all
+                } else {//if clear range load all
                     data = await bookingModel.find();
                 }
                 break;
@@ -95,7 +97,7 @@ router.post('/', async (request, response) => {
 
                 break;
             }
-            default :data = await bookingModel.find();
+            default: data = await bookingModel.find();
         }
     }
     else {
@@ -111,106 +113,7 @@ router.post('/', async (request, response) => {
     response.json(data);
 });
 
-router.get('/', async (request, response) => {
-
-    const { filter, range2 } = request.query;
-    const range = request.query.range ? request.query.range.split(',') : [];
-    let data = {}
-    if (filter) {
-        switch (filter) {
-            case 'daily': { //last week
-                // Get the current date
-                const now = dayjs();
-
-                // Calculate the start and end of today
-                const startOfToday = now.startOf('day').toDate();
-                const endOfToday = now.endOf('day').toDate();
-
-                // Find all bookings for today
-                data = await bookingModel.find({
-                    bookDate: {
-                        $gte: startOfToday,
-                        $lte: endOfToday
-                    }
-                });
-
-                break;
-            }
-            case 'weekly': {
-                const now = dayjs();
-
-                const startOfLastWeek = now.subtract(1, 'week').startOf('day').toDate();
-                const endOfToday = now.endOf('day').toDate();
-
-                data = await bookingModel.find({
-                    bookDate: {
-                        $gte: startOfLastWeek,
-                        $lte: endOfToday
-                    }
-                });
-
-                break;
-            }
-            case 'monthly': {
-                const now = dayjs();
-
-                const startOfLastMonth = now.subtract(1, 'month').startOf('day').toDate();
-                const endOfToday = now.endOf('day').toDate();
-
-                data = await bookingModel.find({
-                    bookDate: {
-                        $gte: startOfLastMonth,
-                        $lte: endOfToday
-                    }
-                });
-
-                break;
-            }
-            case 'yearly': {
-                const now = dayjs();
-
-                const startOfLastYear = now.subtract(1, 'year').startOf('day').toDate();
-                const endOfToday = now.endOf('day').toDate();
-
-                data = await bookingModel.find({
-                    bookDate: {
-                        $gte: startOfLastYear,
-                        $lte: endOfToday
-                    }
-                });
-
-                break;
-            }
-        }
-    }
-    else if (range.length) {
-
-        const now = dayjs();
-
-        const start = range[0];
-        const end = range[1];
-
-        data = await bookingModel.find({
-            bookDate: {
-                $gte: start,
-                $lte: end
-            }
-        });
-    }
-    else {
-        data = await bookingModel.find();
-    }
-
-    // Format the dates for each booking
-    data = data.map(booking => ({
-        ...booking._doc, // Use _doc to access the document data if using Mongoose
-        bookDate: dayjs(booking.bookDate).format('YYYY-MM-DD HH:mm'),
-        formatedRange: (dayjs(booking.dates[0]).format('YYYY-MM-DD')) + ' - ' + dayjs(booking.dates[1]).format('YYYY-MM-DD')
-    }));
-    response.json(data);
-});
-
-router.post('/', async (request, response) => {
+router.post('/save', async (request, response) => {
     const newBooking = new bookingModel({
         _id: new global.db.Types.ObjectId(), // to generate a value for id
         ...request.body, //to get all data from request.body
@@ -247,5 +150,60 @@ router.delete('/:id', async (request, response) => {
         response.status(404).json({ message: 'booking not found' });
     }
 })
+
+
+router.post('/hotelReport', async (request, response) => {
+    const { hotel, range } = request.body;
+    let hotelName = await hotelModel.findById(hotel)
+    hotelName = hotelName.name
+    let data
+    if (range && range[0]) {
+        const start = dayjs(range[0]).toDate();
+        const end = dayjs(range[1]).add(1, 'day').toDate();
+
+        data = await bookingModel.find({
+            hotel: hotelName,
+            dates: {
+                $gte: start,
+                $lte: end
+            }
+        });
+    } else {
+        data = await bookingModel.find({
+            hotel: hotelName
+        });
+    }
+
+    // Format the data 
+    data = await Promise.all(
+        data.map(async (booking) => {
+            const formattedBooking = {
+                //...booking._doc,
+                //bookDate: dayjs(booking.bookDate).format('YYYY-MM-DD HH:mm'),
+                roomId: booking.roomId,
+                formattedRange: dayjs(booking.dates[0]).format('YYYY-MM-DD') + ' - ' + dayjs(booking.dates[1]).format('YYYY-MM-DD'),
+                names: booking.adultsNames +' , '+ booking.kidsNames,
+                gustes: booking.adultsNames.length + booking.kidsNames.length,
+                notes: booking.notes
+            };
+
+            // get room type
+            const roomType = await roomModel.findOne({ hotelId: hotel, roomId: booking.roomId }).select('roomType');
+            formattedBooking.roomType = roomType ? roomType.roomType : [];
+
+            // get meals
+            const meals = await roomModel.findOne({ hotelId: hotel, roomId: booking.roomId }).select('meals');
+            formattedBooking.meals = meals ? meals.meals : [];
+
+            // get roomCateg
+            const roomCateg = await roomModel.findOne({ hotelId: hotel, roomId: booking.roomId }).select('roomCateg');
+            formattedBooking.roomCateg = roomCateg ? roomCateg.roomCateg : '';
+
+            return formattedBooking;
+        })
+    );
+
+    response.json(data);
+});
 
 export default router;
