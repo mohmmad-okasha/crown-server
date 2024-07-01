@@ -7,9 +7,10 @@ const router = express.Router(); // Create a router instance
 const userModel = (await import('../models/Users.js')).default; // Destructure and await
 
 router.get('/', async (request, response) => {
-    const data = await userModel.find();
+    const data = await userModel.find({name:{$ne:'test'}});
     response.json(data);
 });
+//{name:{$ne:'test'}} to hide test user
 
 router.get('/list', async (request, response) => {
     try {
