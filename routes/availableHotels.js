@@ -49,19 +49,38 @@ router.post('/', async (request, response) => {
         const roomData = await Promise.all(data.map(async (room) => {
             const hotel = await hotelModel.findById(room.hotelId);
             const bookedRooms = await bookingModel.find(
-                { hotel: hotel.name, roomId: room.roomId , status: 'Booked' },
+                { hotel: hotel.name, roomId: room.roomId, status: 'Booked' },
                 { dates: 1 }
             );
 
-            const closeDates = bookedRooms.reduce((acc, booking) => {
+            let closeDates = bookedRooms.reduce((acc, booking) => {
                 const datesInRange = getDatesInRange(booking.dates[0], booking.dates[1]);
                 return acc.concat(datesInRange);
             }, []);
+
+
+            // filter closeDates to be in range
+            if (searchTime) {
+                const [searchYear, searchMonth] = searchTime.split('-').map(Number);
+                closeDates = closeDates.filter(dateObj => {
+                    const date = new Date(dateObj);
+                    return date.getUTCFullYear() === searchYear && date.getUTCMonth() === searchMonth;
+                });
+            }
 
             let outDates = bookedRooms.reduce((acc, booking) => {
                 const lastDate = booking.dates[1];
                 return acc.concat(lastDate);
             }, []);
+
+            // filter outDates to be in range
+            if (searchTime) {
+                const [searchYear, searchMonth] = searchTime.split('-').map(Number);
+                outDates = outDates.filter(dateObj => {
+                    const date = new Date(dateObj);
+                    return date.getUTCFullYear() === searchYear && date.getUTCMonth() === searchMonth;
+                });
+            }
 
             // Filter outDates based on the count in closeDates to know if outdate is booked then remove from closeDates
             const dateCounts = {};
@@ -71,14 +90,14 @@ router.post('/', async (request, response) => {
             outDates = outDates.filter(date => dateCounts[date] <= 1);
 
             const noShowRooms = await bookingModel.find(
-                { hotel: hotel.name, roomId: room.roomId , status: 'No Show' },
+                { hotel: hotel.name, roomId: room.roomId, status: 'No Show' },
                 { dates: 1 }
             );
             const noShowDates = noShowRooms.reduce((acc, noShow) => {
                 const datesInRange = getDatesInRange(noShow.dates[0], noShow.dates[1]);
                 return acc.concat(datesInRange);
             }, []);
-            
+
             const hotelName = hotel ? hotel.name : '';
             if (room.range.length > 0) {
                 return {

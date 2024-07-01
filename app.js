@@ -14,7 +14,7 @@ app.use(express.json()); // To receive JSON data
 // Database connection
 const userName = "swpl";
 const password = "123456sw";
-const dbName = "test";
+const dbName = "crown";
 
 mongoose.connect(
   `mongodb+srv://${userName}:${password}@cluster0.nljjhtw.mongodb.net/${dbName}?retryWrites=true&w=majority&appName=Cluster0`

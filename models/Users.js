@@ -9,6 +9,6 @@ const UsersSchema = new mongoose.Schema({
     active: { type: Boolean }
 })
 
-const userModel = mongoose.model("crown_users", UsersSchema)
+const userModel = mongoose.model("users", UsersSchema)
 
 export default userModel

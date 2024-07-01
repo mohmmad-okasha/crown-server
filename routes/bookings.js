@@ -108,7 +108,8 @@ router.post('/', async (request, response) => {
     data = data.map(booking => ({
         ...booking._doc, // Use _doc to access the document data if using Mongoose
         bookDate: dayjs(booking.bookDate).format('YYYY-MM-DD HH:mm'),
-        formatedRange: (dayjs(booking.dates[0]).format('YYYY-MM-DD')) + ' - ' + dayjs(booking.dates[1]).format('YYYY-MM-DD')
+        formatedRange: (dayjs(booking.dates[0]).format('YYYY-MM-DD')) + ' - ' + dayjs(booking.dates[1]).format('YYYY-MM-DD'),
+    
     }));
     response.json(data);
 });

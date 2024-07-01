@@ -7,7 +7,7 @@ const RoomsSchema = new mongoose.Schema({
     roomCateg: { type: String },
     meals: { type: String },
     persons: { type: Number },
-    range: { type: [Date] },
+    range:  {},
     notes: { type: String },
     user: { type: String },
 })
