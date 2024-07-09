@@ -87,6 +87,10 @@ router.post('/', async (request, response) => {
             closeDates.forEach(date => {
                 dateCounts[date] = (dateCounts[date] || 0) + 1;
             });
+
+            //get dates of out and in same day
+            let inOutDates = outDates.filter(date => dateCounts[date] > 1);
+
             outDates = outDates.filter(date => dateCounts[date] <= 1);
 
             const noShowRooms = await bookingModel.find(
@@ -106,6 +110,7 @@ router.post('/', async (request, response) => {
                     dates: room.range,
                     close: closeDates,
                     outDates: outDates,
+                    inOutDates: inOutDates,
                     noShowDates: noShowDates,
                 };
             }
