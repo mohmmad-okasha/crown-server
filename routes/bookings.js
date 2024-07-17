@@ -14,7 +14,7 @@ router.post('/', async (request, response) => {
     if (filter) {
         switch (filter) {
             case 'All': {
-                data = await bookingModel.find()
+                data = await bookingModel.find().sort({ _id: -1 });
             }
             case 'Custom Date': {
                 if (range[0]) {
@@ -30,7 +30,7 @@ router.post('/', async (request, response) => {
                         }
                     });
                 } else {//if clear range load all
-                    data = await bookingModel.find();
+                    data = await bookingModel.find().sort({ _id: -1 });
                 }
                 break;
             }
@@ -48,7 +48,7 @@ router.post('/', async (request, response) => {
                         $gte: startOfToday,
                         $lte: endOfToday
                     }
-                });
+                }).sort({ _id: -1 });
 
                 break;
             }
@@ -63,7 +63,7 @@ router.post('/', async (request, response) => {
                         $gte: startOfLastWeek,
                         $lte: endOfToday
                     }
-                });
+                }).sort({ _id: -1 });
 
                 break;
             }
@@ -78,7 +78,7 @@ router.post('/', async (request, response) => {
                         $gte: startOfLastMonth,
                         $lte: endOfToday
                     }
-                });
+                }).sort({ _id: -1 });
 
                 break;
             }
@@ -93,15 +93,15 @@ router.post('/', async (request, response) => {
                         $gte: startOfLastYear,
                         $lte: endOfToday
                     }
-                });
+                }).sort({ _id: -1 });
 
                 break;
             }
-            default: data = await bookingModel.find();
+            default: data = await bookingModel.find().sort({ _id: -1 });;
         }
     }
     else {
-        data = await bookingModel.find();
+        data = await bookingModel.find().sort({ _id: -1 });;
     }
 
     // Format the dates for each booking
